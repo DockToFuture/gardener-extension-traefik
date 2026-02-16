@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
+---
+images:
+- name: traefik
+  resourceId:
+    name: traefik
+  sourceRepository: github.com/traefik/traefik
+  repository: docker.io/library/traefik
+  tag: "v3.6.7"

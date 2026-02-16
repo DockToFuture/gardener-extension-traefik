@@ -1,0 +1,17 @@
+apiVersion: operator.gardener.cloud/v1alpha1
+kind: Extension
+metadata:
+  name: gardener-extension-traefik
+  annotations:
+    security.gardener.cloud/pod-security-enforce: baseline
+spec:
+  resources:
+  - kind: Extension
+    type: traefik
+    workerlessSupported: false
+    clusterCompatibility:
+    - shoot
+    lifecycle:
+      reconcile: BeforeKubeAPIServer
+      delete: AfterKubeAPIServer
+      migrate: AfterKubeAPIServer

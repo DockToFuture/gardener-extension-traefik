@@ -1,0 +1,32 @@
+# More info: https://docs.docker.com/engine/reference/builder/#dockerignore-file
+# Ignore unnecessary files to optimize Docker build context
+
+# Development and local files
+bin/
+.git/
+.github/
+dev/
+
+# Test files
+**/*_test.go
+**/suite_test.go
+test/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Examples and development setup
+examples/
+
+# Build artifacts and tools
+internal/tools/
+coverage.txt
+
+# Configuration files
+.golangci.yaml
+renovate.json
+api-ref-docs.yaml
+.dockerignore
+Dockerfile

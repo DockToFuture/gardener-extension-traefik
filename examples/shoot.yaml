@@ -1,0 +1,55 @@
+apiVersion: core.gardener.cloud/v1beta1
+kind: Shoot
+metadata:
+  name: local
+  namespace: garden-local
+  annotations:
+    shoot.gardener.cloud/cloud-config-execution-max-delay-seconds: "0"
+    authentication.gardener.cloud/issuer: "managed"
+spec:
+  # Purpose must be "evaluation" to enable the Traefik extension.
+  # This is validated by the admission webhook.
+  purpose: evaluation
+  extensions:
+    # Traefik extension deploys Traefik ingress controller to the shoot cluster
+    # as a replacement for nginx-ingress-controller which is out of maintenance.
+    - type: traefik
+      providerConfig:
+        apiVersion: traefik.extensions.gardener.cloud/v1alpha1
+        kind: TraefikConfig
+        spec:
+          # Optional: Custom Traefik image (if not specified, uses image from imagevector: docker.io/library/traefik:v3.6.7)
+          # image: docker.io/library/traefik:v3.6.8
+          # Optional: Number of Traefik replicas
+          replicas: 2
+          # Optional: Ingress class name (default: "traefik")
+          ingressClass: traefik
+  cloudProfile:
+    name: local
+    kind: CloudProfile
+  credentialsBindingName: local # dummy, doesn't contain any credentials
+  region: local
+  networking:
+    type: calico
+    # Must be within 10.0.0.0/16 (subnet of kind pod CIDR 10.0.0.0/15, but disjoint with seed pod CIDR 10.1.0.0/16).
+    nodes: 10.0.0.0/16
+  provider:
+    type: local
+    workers:
+    - name: local
+      machine:
+        type: local
+      cri:
+        name: containerd
+      minimum: 1
+      maximum: 2
+      maxSurge: 1
+      maxUnavailable: 0
+  kubernetes:
+    kubelet:
+      seccompDefault: true
+      serializeImagePulls: false
+      registryPullQPS: 10
+      registryBurst: 20
+      protectKernelDefaults: true
+      streamingConnectionIdleTimeout: 5m
