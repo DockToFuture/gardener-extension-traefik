@@ -1,0 +1,13 @@
+# See the OWNERS docs at https://go.k8s.io/owners
+
+aliases:
+  gardener-extension-shoot-traefik-reviewers:
+  - domdom82
+  - axel7born
+  - DockToFuture
+  - ScheererJ
+  gardener-extension-shoot-traefik-approvers:
+  - domdom82
+  - axel7born
+  - DockToFuture
+  - ScheererJ
