@@ -27,13 +27,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
-	extenimagev "gardener-extension-shoot-traefik/imagevector"
-	"gardener-extension-shoot-traefik/pkg/actuator"
-	configinstall "gardener-extension-shoot-traefik/pkg/apis/config/install"
-	"gardener-extension-shoot-traefik/pkg/controller"
-	"gardener-extension-shoot-traefik/pkg/heartbeat"
-	"gardener-extension-shoot-traefik/pkg/mgr"
-	"gardener-extension-shoot-traefik/pkg/webhook"
+	extenimagev "github.com/gardener/gardener-extension-shoot-traefik/imagevector"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/actuator"
+	configinstall "github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config/install"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/controller"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/heartbeat"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/mgr"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/webhook"
 )
 
 // flags stores the manager flags as provided from the command-line

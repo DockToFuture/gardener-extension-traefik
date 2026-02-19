@@ -11,8 +11,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
-	managercmd "gardener-extension-shoot-traefik/cmd/extension-traefik/internal/manager"
-	"gardener-extension-shoot-traefik/pkg/version"
+	managercmd "github.com/gardener/gardener-extension-shoot-traefik/cmd/extension-traefik/internal/manager"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/version"
 )
 
 func main() {

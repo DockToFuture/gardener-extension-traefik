@@ -22,7 +22,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"gardener-extension-shoot-traefik/pkg/mgr"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/mgr"
 )
 
 var _ = Describe("Manager", Ordered, func() {

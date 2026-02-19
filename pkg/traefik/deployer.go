@@ -26,7 +26,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"gardener-extension-shoot-traefik/pkg/apis/config"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config"
 )
 
 // Config holds the configuration for the Traefik deployment.

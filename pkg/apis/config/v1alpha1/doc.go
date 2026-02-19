@@ -4,7 +4,7 @@
 
 // +k8s:deepcopy-gen=package
 // +k8s:defaulter-gen=TypeMeta
-// +k8s:conversion-gen=gardener-extension-shoot-traefik/pkg/apis/config
+// +k8s:conversion-gen=github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config
 // +groupName=traefik.extensions.gardener.cloud
 
 // Package v1alpha1 provides the v1alpha1 version of the external API types.

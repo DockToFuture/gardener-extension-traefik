@@ -18,9 +18,9 @@ import (
 	crctrl "sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"gardener-extension-shoot-traefik/imagevector"
-	"gardener-extension-shoot-traefik/pkg/actuator"
-	"gardener-extension-shoot-traefik/pkg/controller"
+	"github.com/gardener/gardener-extension-shoot-traefik/imagevector"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/actuator"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/controller"
 )
 
 var _ = Describe("Controller", Ordered, func() {

@@ -19,9 +19,9 @@ import (
 	"k8s.io/component-base/featuregate"
 	"k8s.io/utils/ptr"
 
-	"gardener-extension-shoot-traefik/imagevector"
-	"gardener-extension-shoot-traefik/pkg/actuator"
-	"gardener-extension-shoot-traefik/pkg/apis/config"
+	"github.com/gardener/gardener-extension-shoot-traefik/imagevector"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/actuator"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config"
 )
 
 var _ = Describe("Actuator", Ordered, func() {

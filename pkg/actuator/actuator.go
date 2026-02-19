@@ -23,9 +23,9 @@ import (
 	"k8s.io/component-base/featuregate"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"gardener-extension-shoot-traefik/pkg/apis/config"
-	"gardener-extension-shoot-traefik/pkg/metrics"
-	"gardener-extension-shoot-traefik/pkg/traefik"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/metrics"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/traefik"
 )
 
 // ErrInvalidActuator is an error which is returned when creating an [Actuator]

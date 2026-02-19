@@ -13,7 +13,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"gardener-extension-shoot-traefik/pkg/apis/config"
+	"github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config"
 )
 
 func TestDeployment_ImageOverride(t *testing.T) {
