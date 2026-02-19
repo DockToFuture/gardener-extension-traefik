@@ -5,6 +5,7 @@
 package traefik
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -213,14 +214,7 @@ func TestDeployment_IngressProvider(t *testing.T) {
 
 			// Check expected args are present
 			for _, expectedArg := range tt.expectedArgs {
-				found := false
-				for _, arg := range args {
-					if arg == expectedArg {
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !slices.Contains(args, expectedArg) {
 					t.Errorf("expected arg %q not found in deployment args: %v", expectedArg, args)
 				}
 			}
@@ -243,14 +237,7 @@ func TestDeployment_IngressProvider(t *testing.T) {
 				"--entrypoints.websecure.address=:8443",
 			}
 			for _, commonArg := range commonArgs {
-				found := false
-				for _, arg := range args {
-					if arg == commonArg {
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !slices.Contains(args, commonArg) {
 					t.Errorf("common arg %q not found in deployment args: %v", commonArg, args)
 				}
 			}
@@ -303,27 +290,16 @@ func TestClusterRole_RBAC_Permissions(t *testing.T) {
 			// Check for namespace permissions
 			hasNamespacePerms := false
 			for _, rule := range clusterRole.Rules {
-				for _, resource := range rule.Resources {
-					if resource == "namespaces" {
-						hasNamespacePerms = true
-						// Verify the permissions are correct
-						expectedVerbs := []string{"get", "list", "watch"}
-						for _, verb := range expectedVerbs {
-							found := false
-							for _, v := range rule.Verbs {
-								if v == verb {
-									found = true
-									break
-								}
-							}
-							if !found {
-								t.Errorf("expected verb %q for namespaces resource not found", verb)
-							}
+				if slices.Contains(rule.Resources, "namespaces") {
+					hasNamespacePerms = true
+					// Verify the permissions are correct
+					expectedVerbs := []string{"get", "list", "watch"}
+					for _, verb := range expectedVerbs {
+						if !slices.Contains(rule.Verbs, verb) {
+							t.Errorf("expected verb %q for namespaces resource not found", verb)
 						}
-						break
 					}
-				}
-				if hasNamespacePerms {
+
 					break
 				}
 			}
@@ -347,23 +323,15 @@ func TestClusterRole_RBAC_Permissions(t *testing.T) {
 			for resource, expectedVerbs := range commonResources {
 				found := false
 				for _, rule := range clusterRole.Rules {
-					for _, res := range rule.Resources {
-						if res == resource {
-							found = true
-							for _, verb := range expectedVerbs {
-								verbFound := false
-								for _, v := range rule.Verbs {
-									if v == verb {
-										verbFound = true
-										break
-									}
-								}
-								if !verbFound {
-									t.Errorf("expected verb %q for resource %q not found", verb, resource)
-								}
+					if slices.Contains(rule.Resources, resource) {
+						found = true
+						for _, verb := range expectedVerbs {
+							if !slices.Contains(rule.Verbs, verb) {
+								t.Errorf("expected verb %q for resource %q not found", verb, resource)
 							}
-							break
 						}
+
+						break
 					}
 				}
 				if !found {

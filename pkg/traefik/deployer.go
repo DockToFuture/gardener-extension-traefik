@@ -61,7 +61,7 @@ type Deployer struct {
 }
 
 // NewDeployer creates a new Deployer.
-func NewDeployer(c client.Client, logger logr.Logger, config Config, imageVector imagevector.ImageVector) *Deployer {
+func NewDeployer(c client.Client, logger logr.Logger, cfg Config, imageVector imagevector.ImageVector) *Deployer {
 	scheme := runtime.NewScheme()
 	_ = corev1.AddToScheme(scheme)
 	_ = appsv1.AddToScheme(scheme)
@@ -72,7 +72,7 @@ func NewDeployer(c client.Client, logger logr.Logger, config Config, imageVector
 		client:      c,
 		decoder:     serializer.NewCodecFactory(scheme).UniversalDecoder(),
 		logger:      logger.WithName("traefik-deployer"),
-		config:      config,
+		config:      cfg,
 		imageVector: imageVector,
 	}
 }
