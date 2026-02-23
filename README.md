@@ -11,7 +11,7 @@ The `gardener-extension-shoot-traefik` deploys Traefik ingress controller to Gar
 
 ## Requirements
 
-- [Go 1.25.x](https://go.dev/) or later
+- [Go 1.26.x](https://go.dev/) or later
 - [GNU Make](https://www.gnu.org/software/make/)
 - [Docker](https://www.docker.com/) for local development
 - [Gardener Local Setup](https://gardener.cloud/docs/gardener/local_setup/) for local development
