@@ -13,7 +13,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/component-base/config/v1alpha1"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllerconfig "sigs.k8s.io/controller-runtime/pkg/config"
@@ -64,7 +63,7 @@ var _ = Describe("Manager", Ordered, func() {
 			mgr.WithLeaderElectionNamespace("default"),
 			mgr.WithContext(ctx),
 			mgr.WithMaxConcurrentReconciles(42),
-			mgr.WithControllerOptions(controllerconfig.Controller{RecoverPanic: ptr.To(true)}),
+			mgr.WithControllerOptions(controllerconfig.Controller{RecoverPanic: new(true)}),
 			mgr.WithHealthzCheck("healthz", healthz.Ping),
 			mgr.WithReadyzCheck("readyz", healthz.Ping),
 			mgr.WithHealthProbeAddress(":9091"),

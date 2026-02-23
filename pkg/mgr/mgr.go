@@ -17,7 +17,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	componentbaseconfigv1alpha1 "k8s.io/component-base/config/v1alpha1"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -63,7 +62,7 @@ func New(opts ...Option) (manager.Manager, error) {
 		baseCtxFunc:       context.Background,
 		controllerOpts: controllerconfig.Controller{
 			MaxConcurrentReconciles: 5,
-			RecoverPanic:            ptr.To(true),
+			RecoverPanic:            new(true),
 		},
 		runnables:            make([]manager.Runnable, 0),
 		extraMetricsHandlers: make(map[string]http.Handler),

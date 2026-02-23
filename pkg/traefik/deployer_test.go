@@ -39,8 +39,8 @@ func TestDeployment_ImageOverride(t *testing.T) {
 			imageVector: imagevector.ImageVector{
 				{
 					Name:       "traefik",
-					Repository: strPtr("docker.io/library/traefik"),
-					Tag:        strPtr("v3.6.7"),
+					Repository: new("docker.io/library/traefik"),
+					Tag:        new("v3.6.7"),
 				},
 			},
 			expectedImage: "docker.io/library/traefik:v3.6.7",
@@ -100,10 +100,6 @@ func TestDeployment_ImageOverride(t *testing.T) {
 			}
 		})
 	}
-}
-
-func strPtr(s string) *string {
-	return &s
 }
 
 func contains(s, substr string) bool {
@@ -187,8 +183,8 @@ func TestDeployment_IngressProvider(t *testing.T) {
 			imageVec := imagevector.ImageVector{
 				{
 					Name:       "traefik",
-					Repository: strPtr("docker.io/library/traefik"),
-					Tag:        strPtr("v3.6.7"),
+					Repository: new("docker.io/library/traefik"),
+					Tag:        new("v3.6.7"),
 				},
 			}
 
@@ -281,8 +277,8 @@ func TestDeployment_LogLevel(t *testing.T) {
 			imageVec := imagevector.ImageVector{
 				{
 					Name:       "traefik",
-					Repository: strPtr("docker.io/library/traefik"),
-					Tag:        strPtr("v3.6.7"),
+					Repository: new("docker.io/library/traefik"),
+					Tag:        new("v3.6.7"),
 				},
 			}
 

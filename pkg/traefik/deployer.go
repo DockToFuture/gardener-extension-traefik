@@ -23,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/gardener/gardener-extension-shoot-traefik/pkg/apis/config"
@@ -134,7 +133,7 @@ func (d *Deployer) Deploy(ctx context.Context, namespace string) error {
 			InjectLabels: map[string]string{
 				"shoot.gardener.cloud/no-cleanup": "true",
 			},
-			KeepObjects: ptr.To(false),
+			KeepObjects: new(false),
 		},
 	}
 
@@ -447,7 +446,7 @@ func (d *Deployer) deployment() (*appsv1.Deployment, error) {
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: ptr.To(d.config.Replicas),
+			Replicas: new(d.config.Replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app.kubernetes.io/name":     "traefik",
@@ -465,10 +464,10 @@ func (d *Deployer) deployment() (*appsv1.Deployment, error) {
 				Spec: corev1.PodSpec{
 					ServiceAccountName: ServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
-						RunAsNonRoot: ptr.To(true),
-						RunAsUser:    ptr.To(int64(65532)),
-						RunAsGroup:   ptr.To(int64(65532)),
-						FSGroup:      ptr.To(int64(65532)),
+						RunAsNonRoot: new(true),
+						RunAsUser:    new(int64(65532)),
+						RunAsGroup:   new(int64(65532)),
+						FSGroup:      new(int64(65532)),
 					},
 					Containers: []corev1.Container{
 						{
@@ -537,8 +536,8 @@ func (d *Deployer) deployment() (*appsv1.Deployment, error) {
 								},
 							},
 							SecurityContext: &corev1.SecurityContext{
-								AllowPrivilegeEscalation: ptr.To(false),
-								ReadOnlyRootFilesystem:   ptr.To(true),
+								AllowPrivilegeEscalation: new(false),
+								ReadOnlyRootFilesystem:   new(true),
 								Capabilities: &corev1.Capabilities{
 									Drop: []corev1.Capability{"ALL"},
 								},
