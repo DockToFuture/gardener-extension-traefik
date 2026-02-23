@@ -70,6 +70,7 @@ func autoConvert_v1alpha1_TraefikConfigSpec_To_config_TraefikConfigSpec(in *Trae
 	out.Replicas = in.Replicas
 	out.IngressClass = in.IngressClass
 	out.IngressProvider = config.IngressProviderType(in.IngressProvider)
+	out.LogLevel = in.LogLevel
 	return nil
 }
 
@@ -83,6 +84,7 @@ func autoConvert_config_TraefikConfigSpec_To_v1alpha1_TraefikConfigSpec(in *conf
 	out.Replicas = in.Replicas
 	out.IngressClass = in.IngressClass
 	out.IngressProvider = IngressProviderType(in.IngressProvider)
+	out.LogLevel = in.LogLevel
 	return nil
 }
 

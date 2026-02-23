@@ -39,6 +39,8 @@ type Config struct {
 	IngressClass string
 	// IngressProvider specifies which Kubernetes Ingress provider to use.
 	IngressProvider config.IngressProviderType
+	// LogLevel sets the Traefik log level.
+	LogLevel string
 }
 
 // DefaultConfig returns the default configuration for Traefik.
@@ -48,6 +50,7 @@ func DefaultConfig() Config {
 		Replicas:        2,
 		IngressClass:    "traefik",
 		IngressProvider: config.IngressProviderKubernetesIngress,
+		LogLevel:        "INFO",
 	}
 }
 
@@ -319,12 +322,19 @@ func (d *Deployer) clusterRole() *rbacv1.ClusterRole {
 		},
 	}
 
-	// Add namespace permissions for NGINX provider when using namespace selectors
+	// Add namespace and pod permissions for NGINX provider
+	// Namespaces are required for watchNamespaceSelector
+	// Pods are required for OTel attributes injection and other functionality
 	if d.config.IngressProvider == config.IngressProviderKubernetesIngressNGINX {
 		rules = append(rules, rbacv1.PolicyRule{
 			APIGroups: []string{""},
 			Resources: []string{"namespaces"},
 			Verbs:     []string{"get", "list", "watch"},
+		})
+		rules = append(rules, rbacv1.PolicyRule{
+			APIGroups: []string{""},
+			Resources: []string{"pods"},
+			Verbs:     []string{"get"},
 		})
 	}
 
@@ -405,7 +415,7 @@ func (d *Deployer) deployment() (*appsv1.Deployment, error) {
 		"--entrypoints.web.address=:8000",
 		"--entrypoints.websecure.address=:8443",
 		"--entrypoints.metrics.address=:9100",
-		"--log.level=INFO",
+		fmt.Sprintf("--log.level=%s", d.config.LogLevel),
 	}
 
 	// Configure the appropriate Kubernetes Ingress provider
@@ -605,6 +615,12 @@ func (d *Deployer) service() *corev1.Service {
 }
 
 func (d *Deployer) ingressClass() *networkingv1.IngressClass {
+	// Set the controller based on the ingress provider type
+	controller := "traefik.io/ingress-controller"
+	if d.config.IngressProvider == config.IngressProviderKubernetesIngressNGINX {
+		controller = "k8s.io/ingress-nginx"
+	}
+
 	return &networkingv1.IngressClass{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "networking.k8s.io/v1",
@@ -623,7 +639,7 @@ func (d *Deployer) ingressClass() *networkingv1.IngressClass {
 			},
 		},
 		Spec: networkingv1.IngressClassSpec{
-			Controller: "traefik.io/ingress-controller",
+			Controller: controller,
 		},
 	}
 }

@@ -245,6 +245,76 @@ func TestDeployment_IngressProvider(t *testing.T) {
 	}
 }
 
+func TestDeployment_LogLevel(t *testing.T) {
+	tests := []struct {
+		name        string
+		logLevel    string
+		expectedArg string
+	}{
+		{
+			name:        "INFO log level",
+			logLevel:    "INFO",
+			expectedArg: "--log.level=INFO",
+		},
+		{
+			name:        "DEBUG log level",
+			logLevel:    "DEBUG",
+			expectedArg: "--log.level=DEBUG",
+		},
+		{
+			name:        "WARN log level",
+			logLevel:    "WARN",
+			expectedArg: "--log.level=WARN",
+		},
+		{
+			name:        "ERROR log level",
+			logLevel:    "ERROR",
+			expectedArg: "--log.level=ERROR",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scheme := runtime.NewScheme()
+			client := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+			imageVec := imagevector.ImageVector{
+				{
+					Name:       "traefik",
+					Repository: strPtr("docker.io/library/traefik"),
+					Tag:        strPtr("v3.6.7"),
+				},
+			}
+
+			config := Config{
+				Image:           "",
+				Replicas:        2,
+				IngressClass:    "traefik",
+				IngressProvider: config.IngressProviderKubernetesIngress,
+				LogLevel:        tt.logLevel,
+			}
+
+			deployer := NewDeployer(client, logr.Discard(), config, imageVec)
+			deployment, err := deployer.deployment()
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if deployment == nil {
+				t.Fatal("expected deployment but got nil")
+			}
+
+			args := deployment.Spec.Template.Spec.Containers[0].Args
+
+			// Check that the expected log level arg is present
+			if !slices.Contains(args, tt.expectedArg) {
+				t.Errorf("expected arg %q not found in deployment args: %v", tt.expectedArg, args)
+			}
+		})
+	}
+}
+
 func TestClusterRole_RBAC_Permissions(t *testing.T) {
 	tests := []struct {
 		name                 string
@@ -359,5 +429,73 @@ func TestDefaultConfig(t *testing.T) {
 
 	if defaultCfg.Image != "" {
 		t.Errorf("expected default image to be empty, got %q", defaultCfg.Image)
+	}
+}
+
+func TestIngressClass_Controller(t *testing.T) {
+	tests := []struct {
+		name               string
+		ingressProvider    config.IngressProviderType
+		ingressClass       string
+		expectedController string
+	}{
+		{
+			name:               "KubernetesIngress provider - traefik controller",
+			ingressProvider:    config.IngressProviderKubernetesIngress,
+			ingressClass:       "traefik",
+			expectedController: "traefik.io/ingress-controller",
+		},
+		{
+			name:               "KubernetesIngressNGINX provider - nginx controller",
+			ingressProvider:    config.IngressProviderKubernetesIngressNGINX,
+			ingressClass:       "nginx",
+			expectedController: "k8s.io/ingress-nginx",
+		},
+		{
+			name:               "empty provider defaults to traefik controller",
+			ingressProvider:    "",
+			ingressClass:       "traefik",
+			expectedController: "traefik.io/ingress-controller",
+		},
+		{
+			name:               "NGINX provider with custom class name",
+			ingressProvider:    config.IngressProviderKubernetesIngressNGINX,
+			ingressClass:       "custom-nginx",
+			expectedController: "k8s.io/ingress-nginx",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scheme := runtime.NewScheme()
+			client := fake.NewClientBuilder().WithScheme(scheme).Build()
+
+			config := Config{
+				Image:           "traefik:v3.6.7",
+				Replicas:        2,
+				IngressClass:    tt.ingressClass,
+				IngressProvider: tt.ingressProvider,
+			}
+
+			deployer := NewDeployer(client, logr.Discard(), config, nil)
+			ingressClass := deployer.ingressClass()
+
+			if ingressClass == nil {
+				t.Fatal("expected ingress class but got nil")
+			}
+
+			if ingressClass.Name != tt.ingressClass {
+				t.Errorf("expected ingress class name %q, got %q", tt.ingressClass, ingressClass.Name)
+			}
+
+			if ingressClass.Spec.Controller != tt.expectedController {
+				t.Errorf("expected controller %q, got %q", tt.expectedController, ingressClass.Spec.Controller)
+			}
+
+			// Verify it's marked as default class
+			if ingressClass.Annotations["ingressclass.kubernetes.io/is-default-class"] != "true" {
+				t.Error("expected ingress class to be marked as default")
+			}
+		})
 	}
 }

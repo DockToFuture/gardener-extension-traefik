@@ -64,6 +64,8 @@ spec:
           ingressClass: nginx  # Can use 'nginx' to maintain compatibility
 ```
 
+**Note:** When `ingressProvider: KubernetesIngressNGINX` is set without specifying `ingressClass`, the IngressClass name is automatically set to `"nginx"` for compatibility.
+
 **When to use:**
 - Migrating from NGINX Ingress Controller to Traefik
 - Your existing Ingress resources use NGINX-specific annotations
@@ -96,6 +98,10 @@ spec:
           ingressClass: nginx  # Keep using 'nginx' class name
           replicas: 2
 ```
+
+**Note:** The `ingressClass: nginx` field is optional when using `KubernetesIngressNGINX` - if not specified, it defaults to `"nginx"` automatically.
+
+**Note:** When using `KubernetesIngressNGINX` provider, the IngressClass resource is created with `controller: k8s.io/ingress-nginx` to maintain compatibility with existing Ingress resources that expect the NGINX controller name. Traefik will handle these Ingresses using its NGINX-compatible provider.
 
 ### Step 2: Update IngressClass References (Optional)
 

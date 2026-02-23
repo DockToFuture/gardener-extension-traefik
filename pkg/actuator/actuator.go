@@ -229,6 +229,14 @@ func (a *Actuator) Reconcile(ctx context.Context, logger logr.Logger, ex *extens
 			if cfg.Spec.IngressProvider != "" {
 				traefikConfig.IngressProvider = cfg.Spec.IngressProvider
 			}
+			if cfg.Spec.LogLevel != "" {
+				traefikConfig.LogLevel = cfg.Spec.LogLevel
+			}
+
+			// Auto-set IngressClass to "nginx" for NGINX compatibility mode if not explicitly set
+			if cfg.Spec.IngressProvider == config.IngressProviderKubernetesIngressNGINX && cfg.Spec.IngressClass == "" {
+				traefikConfig.IngressClass = "nginx"
+			}
 		}
 	}
 

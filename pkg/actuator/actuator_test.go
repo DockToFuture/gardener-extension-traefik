@@ -345,6 +345,28 @@ var _ = Describe("Actuator", Ordered, func() {
 			Expect(act.Reconcile(ctx, logger, extResource)).To(Succeed())
 		})
 
+		It("should auto-set IngressClass to 'nginx' for KubernetesIngressNGINX when not specified", func() {
+			cfg := config.TraefikConfig{
+				Spec: config.TraefikConfigSpec{
+					Image:           "traefik:v3.6.8",
+					Replicas:        2,
+					IngressProvider: config.IngressProviderKubernetesIngressNGINX,
+					// IngressClass not specified - should default to "nginx"
+				},
+			}
+			cfgData, err := json.Marshal(cfg)
+			Expect(err).NotTo(HaveOccurred())
+
+			extResource.Spec.ProviderConfig = &runtime.RawExtension{
+				Raw: cfgData,
+			}
+
+			act, err := actuator.New(k8sClient, imagevector.ImageVector(), actuatorOpts...)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(act).NotTo(BeNil())
+			Expect(act.Reconcile(ctx, logger, extResource)).To(Succeed())
+		})
+
 		It("should reconcile with all provider config options", func() {
 			cfg := config.TraefikConfig{
 				Spec: config.TraefikConfigSpec{

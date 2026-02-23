@@ -42,6 +42,11 @@ type TraefikConfigSpec struct {
 	// Use KubernetesIngressNGINX when migrating from NGINX Ingress Controller to maintain
 	// compatibility with existing NGINX-specific annotations.
 	IngressProvider IngressProviderType `json:"ingressProvider,omitempty"`
+
+	// LogLevel sets the Traefik log level.
+	// Valid values are: DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+	// Defaults to "INFO" if not specified.
+	LogLevel string `json:"logLevel,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

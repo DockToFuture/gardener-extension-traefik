@@ -47,6 +47,9 @@ spec:
           replicas: 2
           # Optional: Ingress class name (default: traefik)
           ingressClass: traefik
+          # Optional: Log level (default: INFO)
+          # Valid values: DEBUG, INFO, WARN, ERROR, FATAL, PANIC
+          logLevel: INFO
           # Optional: Ingress provider type (default: KubernetesIngress)
           # Valid values:
           # - KubernetesIngress: Standard Kubernetes Ingress provider
@@ -62,6 +65,7 @@ spec:
 | `spec.image` | string | `traefik:v3.6.8` | Traefik container image |
 | `spec.replicas` | int32 | `2` | Number of Traefik replicas |
 | `spec.ingressClass` | string | `traefik` | Ingress class name that Traefik handles |
+| `spec.logLevel` | string | `INFO` | Traefik log level: `DEBUG`, `INFO`, `WARN`, `ERROR`, `FATAL`, `PANIC` |
 | `spec.ingressProvider` | string | `KubernetesIngress` | Kubernetes Ingress provider type: `KubernetesIngress` or `KubernetesIngressNGINX` |
 
 ### Ingress Provider Types
@@ -85,6 +89,8 @@ The NGINX-compatible provider that supports [NGINX Ingress Controller annotation
 spec:
   ingressProvider: KubernetesIngressNGINX
 ```
+
+**Note:** When using `KubernetesIngressNGINX`, the `ingressClass` defaults to `"nginx"` if not specified, and the IngressClass resource uses `controller: k8s.io/ingress-nginx` for compatibility with existing Ingress resources. Traefik handles these Ingresses using its NGINX-compatible provider.
 
 **When to use KubernetesIngressNGINX:**
 - You're migrating from NGINX Ingress Controller
