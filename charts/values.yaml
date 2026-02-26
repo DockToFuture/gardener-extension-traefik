@@ -50,17 +50,6 @@ extension:
     enabled: true
     election_id: gardener-extension-shoot-traefik-leader-election
 
-# Webhook configuration for admission validation
-webhook:
-  # Enable the admission webhook for validating shoot purpose
-  enabled: true
-  # Port for the webhook server
-  port: 9443
-  # Certificate directory for webhook TLS
-  certDir: /tmp/k8s-webhook-server/serving-certs
-  # Service name for the webhook
-  serviceName: gardener-extension-shoot-traefik-webhook
-
 # Extra values provided by gardenlet during extension deployment.
 #
 # See the links below for more details.

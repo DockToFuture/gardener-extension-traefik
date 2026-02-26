@@ -12,6 +12,7 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	managercmd "github.com/gardener/gardener-extension-shoot-traefik/cmd/extension-traefik/internal/manager"
+	webhookcmd "github.com/gardener/gardener-extension-shoot-traefik/cmd/extension-traefik/webhook"
 	"github.com/gardener/gardener-extension-shoot-traefik/pkg/version"
 )
 
@@ -23,6 +24,7 @@ func main() {
 		Usage:                 "traefik extension for Gardener",
 		Commands: []*cli.Command{
 			managercmd.New(),
+			webhookcmd.New(),
 		},
 	}
 

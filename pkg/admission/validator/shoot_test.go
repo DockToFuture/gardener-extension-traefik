@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package shoot
+package validator
 
 import (
 	"context"
@@ -11,25 +11,21 @@ import (
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-func TestShootWebhook(t *testing.T) {
+func TestValidator(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Shoot Webhook Suite")
+	RunSpecs(t, "Admission Validator Suite")
 }
 
 var _ = Describe("Shoot Validator", func() {
 	var (
-		validator *Validator
+		validator *shootValidator
 		scheme    *runtime.Scheme
-		encoder   runtime.Encoder
 	)
 
 	BeforeEach(func() {
@@ -37,19 +33,12 @@ var _ = Describe("Shoot Validator", func() {
 		Expect(gardencorev1beta1.AddToScheme(scheme)).To(Succeed())
 
 		client := fake.NewClientBuilder().WithScheme(scheme).Build()
-		logger := zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
-		validator = NewValidator(client, logger)
-
-		serializer := json.NewSerializer(json.DefaultMetaFactory, scheme, scheme, false)
-		encoder = serializer
+		decoder := serializer.NewCodecFactory(scheme, serializer.EnableStrict).UniversalDecoder()
+		validator = &shootValidator{
+			client:  client,
+			decoder: decoder,
+		}
 	})
-
-	encodeShoot := func(shoot *gardencorev1beta1.Shoot) []byte {
-		data, err := runtime.Encode(encoder, shoot)
-		Expect(err).NotTo(HaveOccurred())
-
-		return data
-	}
 
 	Context("when shoot has traefik extension", func() {
 		It("should allow shoot with purpose 'evaluation'", func() {
@@ -71,16 +60,8 @@ var _ = Describe("Shoot Validator", func() {
 				},
 			}
 
-			req := admission.Request{
-				AdmissionRequest: admissionv1.AdmissionRequest{
-					Name:      shoot.Name,
-					Namespace: shoot.Namespace,
-					Object:    runtime.RawExtension{Raw: encodeShoot(shoot)},
-				},
-			}
-
-			response := validator.Handle(context.Background(), req)
-			Expect(response.Allowed).To(BeTrue())
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should deny shoot with purpose 'production'", func() {
@@ -102,17 +83,9 @@ var _ = Describe("Shoot Validator", func() {
 				},
 			}
 
-			req := admission.Request{
-				AdmissionRequest: admissionv1.AdmissionRequest{
-					Name:      shoot.Name,
-					Namespace: shoot.Namespace,
-					Object:    runtime.RawExtension{Raw: encodeShoot(shoot)},
-				},
-			}
-
-			response := validator.Handle(context.Background(), req)
-			Expect(response.Allowed).To(BeFalse())
-			Expect(response.Result.Message).To(ContainSubstring("evaluation"))
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("evaluation"))
 		})
 
 		It("should deny shoot with nil purpose", func() {
@@ -133,16 +106,32 @@ var _ = Describe("Shoot Validator", func() {
 				},
 			}
 
-			req := admission.Request{
-				AdmissionRequest: admissionv1.AdmissionRequest{
-					Name:      shoot.Name,
-					Namespace: shoot.Namespace,
-					Object:    runtime.RawExtension{Raw: encodeShoot(shoot)},
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("should deny shoot with purpose 'development'", func() {
+			purpose := gardencorev1beta1.ShootPurposeDevelopment
+			shoot := &gardencorev1beta1.Shoot{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "core.gardener.cloud/v1beta1",
+					Kind:       "Shoot",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-shoot",
+					Namespace: "garden-test",
+				},
+				Spec: gardencorev1beta1.ShootSpec{
+					Purpose: &purpose,
+					Extensions: []gardencorev1beta1.Extension{
+						{Type: "traefik"},
+					},
 				},
 			}
 
-			response := validator.Handle(context.Background(), req)
-			Expect(response.Allowed).To(BeFalse())
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("evaluation"))
 		})
 	})
 
@@ -166,16 +155,29 @@ var _ = Describe("Shoot Validator", func() {
 				},
 			}
 
-			req := admission.Request{
-				AdmissionRequest: admissionv1.AdmissionRequest{
-					Name:      shoot.Name,
-					Namespace: shoot.Namespace,
-					Object:    runtime.RawExtension{Raw: encodeShoot(shoot)},
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should allow shoot with no extensions", func() {
+			purpose := gardencorev1beta1.ShootPurposeProduction
+			shoot := &gardencorev1beta1.Shoot{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "core.gardener.cloud/v1beta1",
+					Kind:       "Shoot",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-shoot",
+					Namespace: "garden-test",
+				},
+				Spec: gardencorev1beta1.ShootSpec{
+					Purpose:    &purpose,
+					Extensions: nil,
 				},
 			}
 
-			response := validator.Handle(context.Background(), req)
-			Expect(response.Allowed).To(BeTrue())
+			err := validator.Validate(context.Background(), shoot, nil)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

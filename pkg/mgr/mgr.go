@@ -39,6 +39,7 @@ type mgr struct {
 	leaderElectionEnabled   bool
 	leaderElectionID        string
 	leaderElectionNamespace string
+	leaderElectionConfig    *rest.Config
 	webhookServer           webhook.Server
 	baseCtxFunc             manager.BaseContextFunc
 	controllerOpts          controllerconfig.Controller
@@ -109,6 +110,7 @@ func New(opts ...Option) (manager.Manager, error) {
 			LeaderElectionID:           m.leaderElectionID,
 			LeaderElectionNamespace:    m.leaderElectionNamespace,
 			LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
+			LeaderElectionConfig:       m.leaderElectionConfig,
 			BaseContext:                m.baseCtxFunc,
 			Controller:                 m.controllerOpts,
 			WebhookServer:              m.webhookServer,
@@ -268,6 +270,19 @@ func WithLeaderElectionID(id string) Option {
 func WithLeaderElectionNamespace(ns string) Option {
 	opt := func(m *mgr) error {
 		m.leaderElectionNamespace = ns
+
+		return nil
+	}
+
+	return opt
+}
+
+// WithLeaderElectionConfig is an [Option], which configures the [rest.Config]
+// to use for leader election. This is useful when the leader election should
+// use a different cluster than the main manager.
+func WithLeaderElectionConfig(c *rest.Config) Option {
+	opt := func(m *mgr) error {
+		m.leaderElectionConfig = c
 
 		return nil
 	}

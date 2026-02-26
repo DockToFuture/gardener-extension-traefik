@@ -33,7 +33,6 @@ import (
 	"github.com/gardener/gardener-extension-shoot-traefik/pkg/controller"
 	"github.com/gardener/gardener-extension-shoot-traefik/pkg/heartbeat"
 	"github.com/gardener/gardener-extension-shoot-traefik/pkg/mgr"
-	"github.com/gardener/gardener-extension-shoot-traefik/pkg/webhook"
 )
 
 // flags stores the manager flags as provided from the command-line
@@ -51,15 +50,10 @@ type flags struct {
 	kubeconfig                string
 	zapLogLevel               string
 	zapLogFormat              string
-
-	// Webhook settings
-	webhookEnabled  bool
-	webhookPort     int
-	webhookCertDir  string
-	resyncInterval  time.Duration
-	pprofBindAddr   string
-	clientConnQPS   float32
-	clientConnBurst int32
+	resyncInterval            time.Duration
+	pprofBindAddr             string
+	clientConnQPS             float32
+	clientConnBurst           int32
 
 	// The following flags are meant to be specified by the Helm chart,
 	// which gardenlet will invoke during deployment. The value of each flag
@@ -95,14 +89,6 @@ func (f *flags) getManager(ctx context.Context) (ctrl.Manager, error) {
 			QPS:   f.clientConnQPS,
 			Burst: f.clientConnBurst,
 		}),
-	}
-
-	// Add webhook configuration if enabled
-	if f.webhookEnabled {
-		opts = append(opts,
-			mgr.WithWebhookPort(f.webhookPort),
-			mgr.WithWebhookCertDir(f.webhookCertDir),
-		)
 	}
 
 	m, err := mgr.New(opts...)
@@ -285,28 +271,6 @@ func New() *cli.Command {
 				Sources:     cli.EnvVars("CLIENT_CONNECTION_BURST"),
 				Destination: &flags.clientConnBurst,
 			},
-			// Webhook configuration flags
-			&cli.BoolFlag{
-				Name:        "webhook-enabled",
-				Usage:       "enable the admission webhook for validating shoots",
-				Value:       true,
-				Sources:     cli.EnvVars("WEBHOOK_ENABLED"),
-				Destination: &flags.webhookEnabled,
-			},
-			&cli.IntFlag{
-				Name:        "webhook-port",
-				Usage:       "port to use for the webhook server",
-				Value:       9443,
-				Sources:     cli.EnvVars("WEBHOOK_PORT"),
-				Destination: &flags.webhookPort,
-			},
-			&cli.StringFlag{
-				Name:        "webhook-cert-dir",
-				Usage:       "directory containing the webhook server certificates",
-				Value:       "/tmp/k8s-webhook-server/serving-certs",
-				Sources:     cli.EnvVars("WEBHOOK_CERT_DIR"),
-				Destination: &flags.webhookCertDir,
-			},
 			// The following flags are meant to be specified by the
 			// Helm chart, which is rendered and deployed by the
 			// gardenlet.
@@ -387,14 +351,6 @@ func runManager(ctx context.Context, cmd *cli.Command) error {
 
 	if err := c.SetupWithManager(ctx, m); err != nil {
 		return fmt.Errorf("failed to setup controller with manager: %w", err)
-	}
-
-	// Setup admission webhook for validating shoot purpose
-	if flags.webhookEnabled {
-		logger.Info("setting up admission webhook for shoot validation")
-		if err := webhook.AddToManager(m, logger); err != nil {
-			return fmt.Errorf("failed to setup webhook: %w", err)
-		}
 	}
 
 	if flags.gardenerVersion != "" {
